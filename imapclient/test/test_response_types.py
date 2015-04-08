@@ -34,3 +34,17 @@ class TestImapbytes(unittest.TestCase):
 
         emailutf8encoded = imapbytes(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=")
         assert emailutf8encoded.decoded() == u'VélôToulouse'
+
+    def test_did_we_broke_python_api(self):
+        try:
+            b'okayyy'.decoded()
+        except AttributeError as e:
+            # were good, function doesnt exist
+            pass
+        else:
+            # were not, if were failing here, deprecate imapbytes.decoded()
+            # make this test pass and choose a new name !
+            totest = b'simple encoded bytes'
+            assert totest.decoded() == imapbytes(totest).decoded()
+            totest = b'=?utf-8?B?VsOpbMO0VG91bG91c2U=?='
+            assert totest.decoded() == imapbytes(totest).decoded()
