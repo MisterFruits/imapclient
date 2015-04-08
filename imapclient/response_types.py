@@ -90,3 +90,7 @@ class BodyData(tuple):
     @property
     def is_multipart(self):
         return isinstance(self[0], list)
+
+# six.binary_type ?
+class imapbytes(bytes):
+    pass
