@@ -261,7 +261,7 @@ class TestParseFetchResponse(unittest.TestCase):
     def test_BODYSTRUCTURE(self):
          self.check_BODYish_single_part(b'BODYSTRUCTURE')
          self.check_BODYish_nested_multipart(b'BODYSTRUCTURE')
-    
+
     def check_BODYish_single_part(self, respType):
         text = b'123 (UID 317 ' + respType +  b'("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 16 1))'
         parsed = parse_fetch_response([text])
@@ -410,6 +410,36 @@ class TestParseFetchResponse(unittest.TestCase):
                 (Address(None, None, b"address4", b"domain4.com"),
                  Address(b"person", None, b"address4b", b"domain4b.com")),
                 None, b"<reply-to-id>", b"<msg_id>"
+            )
+        )
+
+    def test_ENVELOPE_with_utf8_encoding(self):
+        envelope_str = (b'319 (UID 76920 ENVELOPE ('
+                        b'"6 Apr 2015 12:29:09 +0200" '
+                        b'"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3Vsb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?=" '
+                        b'(("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "no-reply-VeloToulouse" "cyclocity.com"))'
+                        b' (("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "no-reply-VeloToulouse" "cyclocity.com"))'
+                        b' (("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "no-reply-VeloToulouse" "cyclocity.com"))'
+                        b' ((NIL NIL "vic.toad.tor" "free.fr"))' # to
+                        b' NIL' # cc
+                        b' NIL' # bcc
+                        b' NIL'
+                        b' "<msg_id>"))')
+
+        output = parse_fetch_response([envelope_str], normalise_times=False)
+
+        self.assertSequenceEqual(output[76920][b'ENVELOPE'],
+            Envelope(
+                datetime(2015, 4, 6, 12, 29, 9, tzinfo=FixedOffset(120)),
+                b"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3Vsb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?=",
+                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"no-reply-VeloToulouse", b"cyclocity.com"),),
+                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"no-reply-VeloToulouse", b"cyclocity.com"),),
+                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"no-reply-VeloToulouse", b"cyclocity.com"),),
+                (Address(None, None, b"vic.toad.tor", b"free.fr"),),
+                None,
+                None,
+                None,
+                b"<msg_id>"
             )
         )
 
