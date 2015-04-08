@@ -14,7 +14,7 @@ from imapclient.fixed_offset import FixedOffset
 from imapclient.response_parser import parse_response, parse_fetch_response, ParseError
 from imapclient.response_types import Envelope, Address
 from imapclient.test.util import unittest
-
+from imapclient import six
 #TODO: test invalid dates and times
 
 
@@ -442,6 +442,11 @@ class TestParseFetchResponse(unittest.TestCase):
                 b"<msg_id>"
             )
         )
+
+        one_of_them = output[76920][b'ENVELOPE'].subject
+        assert one_of_them == b"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3Vsb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?="
+        assert isinstance(one_of_them, bytes)
+        assert isinstance(one_of_them, six.binary_type)
 
     def test_INTERNALDATE(self):
         def check(date_str, expected_dt):
