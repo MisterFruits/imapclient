@@ -24,3 +24,6 @@ class TestImapbytes(unittest.TestCase):
         assert isinstance(someimapbytes, six.binary_type)
         assert somebytes == someimapbytes
 
+    def test_equals(self):
+        assert imapbytes(b'we are bytes') == imapbytes(b'we are bytes')
+        assert imapbytes(b'we are bytes') != imapbytes(b'we are bytes but diffents')
