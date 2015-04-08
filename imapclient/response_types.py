@@ -4,6 +4,7 @@
 
 from collections import namedtuple
 from email.utils import formataddr
+import email.header
 
 from . import six
 
@@ -92,5 +93,11 @@ class BodyData(tuple):
         return isinstance(self[0], list)
 
 # six.binary_type ?
-class imapbytes(bytes):
-    pass
+class imapbytes(bytes): # emailheaderbyte ?
+    def decoded(self, imap_encoding='us-ascii'):
+        ascii_decoded = self.decode(imap_encoding)
+        bytes_output, encoding = email.header.decode_header(ascii_decoded)[0]
+        if encoding:
+            return bytes_output.decode(encoding)
+        return ascii_decoded
+

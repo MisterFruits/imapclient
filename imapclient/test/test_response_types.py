@@ -27,3 +27,10 @@ class TestImapbytes(unittest.TestCase):
     def test_equals(self):
         assert imapbytes(b'we are bytes') == imapbytes(b'we are bytes')
         assert imapbytes(b'we are bytes') != imapbytes(b'we are bytes but diffents')
+
+    def test_decoded(self):
+        simplebytes = imapbytes(b'simple encoded bytes')
+        assert simplebytes.decoded() == u'simple encoded bytes'
+
+        emailutf8encoded = imapbytes(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=")
+        assert emailutf8encoded.decoded() == u'VélôToulouse'
