@@ -23,7 +23,7 @@ xrange = six.moves.xrange
 from .datetime_util import parse_to_datetime
 from .fixed_offset import FixedOffset
 from .response_lexer import TokenSource
-from .response_types import BodyData, Envelope, Address
+from .response_types import BodyData, Envelope, Address, imapbytes
 
 try:
     import imaplib2 as imaplib
@@ -157,7 +157,7 @@ def _convert_ENVELOPE(envelope_response, normalise_times=True):
         dt = parse_to_datetime(envelope_response[0], normalise=normalise_times)
     else:
         dt = None
-    subject = envelope_response[1]
+    subject = imapbytes(envelope_response[1])
 
     # addresses contains a tuple of addresses
     # from, sender, reply_to, to, cc, bcc headers
