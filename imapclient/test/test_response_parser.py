@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2014, Menno Smits
 # Released subject to the New BSD License
 # Please see http://en.wikipedia.org/wiki/BSD_licenses
@@ -12,7 +13,7 @@ from datetime import datetime
 
 from imapclient.fixed_offset import FixedOffset
 from imapclient.response_parser import parse_response, parse_fetch_response, ParseError
-from imapclient.response_types import Envelope, Address
+from imapclient.response_types import Envelope, Address, imapbytes
 from imapclient.test.util import unittest
 from imapclient import six
 #TODO: test invalid dates and times
@@ -417,9 +418,9 @@ class TestParseFetchResponse(unittest.TestCase):
         envelope_str = (b'319 (UID 76920 ENVELOPE ('
                         b'"6 Apr 2015 12:29:09 +0200" '
                         b'"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3Vsb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?=" '
-                        b'(("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "no-reply-VeloToulouse" "cyclocity.com"))'
-                        b' (("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "no-reply-VeloToulouse" "cyclocity.com"))'
-                        b' (("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "no-reply-VeloToulouse" "cyclocity.com"))'
+                        b'(("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "address" "host.com"))'
+                        b' (("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "address" "host.com"))'
+                        b' (("=?utf-8?B?VsOpbMO0VG91bG91c2U=?=" NIL "address" "host.com"))'
                         b' ((NIL NIL "vic.toad.tor" "free.fr"))' # to
                         b' NIL' # cc
                         b' NIL' # bcc
@@ -432,9 +433,9 @@ class TestParseFetchResponse(unittest.TestCase):
             Envelope(
                 datetime(2015, 4, 6, 12, 29, 9, tzinfo=FixedOffset(120)),
                 b"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3Vsb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?=",
-                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"no-reply-VeloToulouse", b"cyclocity.com"),),
-                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"no-reply-VeloToulouse", b"cyclocity.com"),),
-                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"no-reply-VeloToulouse", b"cyclocity.com"),),
+                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"address", b"host.com"),),
+                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"address", b"host.com"),),
+                (Address(b"=?utf-8?B?VsOpbMO0VG91bG91c2U=?=", None, b"address", b"host.com"),),
                 (Address(None, None, b"vic.toad.tor", b"free.fr"),),
                 None,
                 None,
@@ -443,10 +444,14 @@ class TestParseFetchResponse(unittest.TestCase):
             )
         )
 
-        one_of_them = output[76920][b'ENVELOPE'].subject
-        assert one_of_them == b"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3Vsb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?="
-        assert isinstance(one_of_them, bytes)
-        assert isinstance(one_of_them, six.binary_type)
+        subject = output[76920][b'ENVELOPE'].subject
+        assert subject == (b"=?utf-8?B?Vm90cmUgYWJvbm5lbWVudCBWw6lsw7RUb3V"
+                           b"sb3VzZSBzZSB0ZXJtaW5lIGJpZW50w7R0ICE=?=")
+        assert subject.decoded() == (u'Votre abonnement '
+                                     u'VélôToulouse se termine bientôt !')
+        assert isinstance(subject, bytes)
+        assert isinstance(subject, six.binary_type)
+        assert isinstance(subject, imapbytes)
 
     def test_INTERNALDATE(self):
         def check(date_str, expected_dt):
