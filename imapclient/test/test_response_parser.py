@@ -450,8 +450,11 @@ class TestParseFetchResponse(unittest.TestCase):
         assert subject.decoded() == (u'Votre abonnement '
                                      u'VélôToulouse se termine bientôt !')
         assert isinstance(subject, bytes)
-        assert isinstance(subject, six.binary_type)
         assert isinstance(subject, imapbytes)
+        for addresses in output[76920][b'ENVELOPE'][2:5]:
+            assert isinstance(addresses[0].name, bytes)
+            assert isinstance(addresses[0].name, imapbytes)
+
 
     def test_INTERNALDATE(self):
         def check(date_str, expected_dt):

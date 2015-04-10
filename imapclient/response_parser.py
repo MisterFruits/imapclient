@@ -161,22 +161,25 @@ def _convert_ENVELOPE(envelope_response, normalise_times=True):
 
     # addresses contains a tuple of addresses
     # from, sender, reply_to, to, cc, bcc headers
-    addresses = []
-    for addr_list in envelope_response[2:8]:
-        addrs = []
-        if addr_list:
-            for addr_tuple in addr_list:
-                if addr_tuple:
-                    addrs.append(Address(*addr_tuple))
-            addresses.append(tuple(addrs))
-        else:
-            addresses.append(None)
+    addresses = [_convert_addr_list(addr_list)
+                    for addr_list in envelope_response[2:8]]
 
     return Envelope(
         dt, subject, *addresses,
         in_reply_to=envelope_response[8],
         message_id=envelope_response[9]
     )
+
+def _convert_addr_list(addr_list):
+    if not addr_list:
+        return None
+
+    addrs = []
+    for addr_tuple in addr_list:
+        if addr_tuple:
+            name = imapbytes(addr_tuple[0]) if addr_tuple[0] is not None else None
+            addrs.append(Address(name, *addr_tuple[1:]))
+    return tuple(addrs)
 
 def atom(src, token):
     if token == b'(':
