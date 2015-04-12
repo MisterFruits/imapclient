@@ -57,7 +57,7 @@ class Address(namedtuple("Address", "name route mailbox host")):
 
     def _check_types(self):
         for key in self._fields:
-            self._check_type(key, basestring)
+            self._check_type(key, six.string_types)
 
     def __str__(self):
         self._check_types()
