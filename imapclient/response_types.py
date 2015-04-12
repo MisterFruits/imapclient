@@ -49,8 +49,19 @@ class Address(namedtuple("Address", "name route mailbox host")):
     See :rfc:`2822` for more.
     """
 
+    def _check_type(self, field, expected_type):
+        value = getattr(self, field)
+        if value and not isinstance(value, expected_type):
+            raise ValueError('{} attributes expected type is {} while it is {}'
+                .format(field, expected_type, type(value)))
+
+    def _check_types(self):
+        for key in self._fields:
+            self._check_type(key, basestring)
+
     def __str__(self):
-        return formataddr((self.name, self.mailbox + '@' + self.host))
+        self._check_types()
+        return formataddr((self.name, self.mailbox + b'@' + self.host))
 
 
 class SearchIds(list):
